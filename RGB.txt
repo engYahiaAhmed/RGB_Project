@@ -1,0 +1,984 @@
+/*
+ * online_course_11.c
+ *
+ * Created: 1/27/2023 2:15:16 AM
+ * Author : Yahia Ahmed
+ */
+
+#define  F_CPU 8000000
+#include <util/delay.h>
+#include "DIO_Interface.h"
+#include "MemMap.h"
+#include "KeyPad_interface.h"
+#include "ADC.h"
+#include "Timers.h"
+#include "LCD2.h"
+#include "calculator.h"
+#include "RGB_interface.h"
+typedef enum
+{
+	stop=0,
+	set_color,
+	lightWithColor,
+	ShowRoom,
+	ShowRoomSwap,
+	TravelAllColors,
+	ShowRoomAllColors
+	}RunningMode;
+void swap(u8* f,u8* sec)
+{
+	cli();
+	u8 t=*f;
+	*f=*sec;
+	*sec=t;
+	sei();
+}
+void f(void)
+{
+	DIO_TogglePin(PINC0);
+}
+int main(void)
+{
+	char* str[7]={"press 1 To more options","Set your color","LightWithStdColor,","ShowRoom one color","ShowRoomSwap 2 ","TravelAllColors","showRoom all colors"};
+	char* arr[12]={
+		 "Yellow " ,
+		 "Blue" ,
+		 "Green " ,
+		  "Red" ,
+		 "orange" ,
+		 "Black " ,
+		 "White " ,
+		 "Purple" ,
+		 " Gray" ,
+		 "Silver" ,
+		 "deepPink" ,
+			"Olive"
+	};
+	RunningMode currMode=stop,prevMode=stop;	
+		
+		
+		
+		
+		
+		
+		
+	
+	DIO_Init();
+	LCD_Init();
+	ADC_Init(VREF_VCC,ADC_SCALER_64);
+	//KEYPAD_Init();
+	LCD_SetCursor(0,0);
+	u8 flag=0,flag3,flag2=0,flagInit=1,red=0,green=0,blue=0,colChoice=-1,colChoice2=-1,first ,sec;
+	//RGB_Init();
+	/*TIMER0_Init(TIMER0_NORMAL_MODE,TIMER0_SCALER_8);
+	TIMER0_OV_InterruptEnable();*/
+//	GOLBLE_INT_ENABLE();
+	
+	/*TIMER0_Init(TIMER0_FASTPWM_MODE,TIMER0_SCALER_8);
+	TIMER0_OC0Mode(OC0_NON_INVERTING);
+	OCR0=100;*/
+	/*Timer1_Init(TIMER1_FASTPWM_ICR_TOP_MODE,TIMER1_SCALER_8);
+	Timer1_OCRA1Mode(OCRB_NON_INVERTING);
+	Timer1_OCRB1Mode(OCRB_NON_INVERTING);
+	ICR1=255;*/
+	//OCR1A=100;
+	//OCR1B=80;
+	//TIMER0_OV_InterruptEnable();
+	//GOLBLE_INT_ENABLE();
+	//RGB_lightWithColor(White);
+	RGB_Init();
+//	RGB_lightWithColor(RGB_Blue);
+	//while(RGB_showRoom(RGB_Red)==FALSE);
+	//while(RGB_showRoom(RGB_Purple)==FALSE);
+;
+	
+
+	u8 i=-1;
+    while (1) 
+    {
+	
+	/*if(flagInit)
+	{
+		LCD_SetCursor(0,0);
+		LCD_WriteString("            ");
+		LCD_SetCursor(0,0);
+		LCD_WriteString("Choose your mode...");
+		_delay_ms(2000);
+		LCD_SetCursor(0,0);
+		LCD_WriteString("                         ");
+		LCD_SetCursor(0,0);
+		LCD_WriteString("1.Set your color ");
+		LCD_SetCursor(1,0);
+		LCD_WriteString("7. To get more options" );
+		LCD_SetCursor(0,0);
+		u8 option=0;*/
+		
+
+
+	  switch (currMode)
+	  {
+		  case  stop:
+		  prevMode=stop;
+		  colChoice=-1,colChoice2=-1;
+		  if(!READ_BIT(PINB,4))
+		  {
+			  
+			  if(flag==0)
+			  {
+				  flag=1;
+				  i++;
+				  i=i%7;
+				  LCD_SetCursor(0,0);
+				  LCD_WriteString("                                            ");
+				  LCD_SetCursor(0,0);
+				  LCD_WriteString(str[i]);
+				  _delay_ms(200);
+			  }
+			}else{
+			  flag=0;
+		    }
+			if(!READ_BIT(PINB,5))
+			{
+				if(flag2==0){
+					if(i!=-1||i==0)
+					{
+						switch (i)
+						{
+							case 1:
+							currMode=set_color; break;
+							case 2:
+							currMode=lightWithColor; break;
+							case 3:
+							currMode=ShowRoom; break;
+							case 4:
+							currMode=ShowRoomSwap; break;
+							case 5:
+							currMode=TravelAllColors; break;
+							case 6:
+							currMode=ShowRoomAllColors;	 break;
+						}
+						_delay_ms(200);
+					}
+					
+				}
+				}else{
+				flag2=0;
+			}
+			break;
+		  case set_color:
+		 
+			LCD_SetCursor(0,0);
+			LCD_WriteString("                                       ");
+			LCD_SetCursor(0,0);
+			LCD_WriteString("RED: ");
+			while (READ_BIT(PINB,6))
+			{
+				if(!READ_BIT(PINB,4))
+				{
+					 if(flag==0){
+						 flag=1;
+						 red++;
+						 LCD_SetCursor(0,5);
+						 LCD_WriteNumber(red);
+						 LCD_WriteString("  ");
+						 _delay_ms(200);
+					 }
+				}else{
+					flag=0;
+				}
+				if(!READ_BIT(PINB,5))
+				{
+					if(flag2==0){
+						flag2=1;
+						red--;
+						LCD_SetCursor(0,5);
+						LCD_WriteNumber(red);
+						LCD_WriteString("  ");
+						_delay_ms(200);
+					}
+					}else{
+					flag2=0;
+				}
+			}
+			LCD_SetCursor(0,0);
+			LCD_WriteString("                                       ");
+			LCD_SetCursor(0,0);
+			LCD_WriteString("Green: ");
+			while (READ_BIT(PINB,6))
+			{
+				if(!READ_BIT(PINB,4))
+				{
+					if(flag==0){
+						flag=1;
+						green++;
+						LCD_SetCursor(0,7);
+						LCD_WriteNumber(green);
+						LCD_WriteString("  ");
+						_delay_ms(200);
+					}
+					}else{
+					flag=0;
+				}
+				if(!READ_BIT(PINB,5))
+				{
+					if(flag2==0){
+						flag2=1;
+						green--;
+						LCD_SetCursor(0,7);
+						LCD_WriteNumber(green);
+						LCD_WriteString("  ");
+						_delay_ms(200);
+					}
+					}else{
+					flag2=0;
+				}
+			}
+			LCD_SetCursor(0,0);
+			LCD_WriteString("                                       ");
+			LCD_SetCursor(0,0);
+			LCD_WriteString("Blue: ");
+			while (READ_BIT(PINB,6))
+			{
+				if(!READ_BIT(PINB,4))
+				{
+					if(flag==0){
+						flag=1;
+						blue++;
+						LCD_SetCursor(0,6);
+						LCD_WriteNumber(blue);
+						LCD_WriteString("  ");
+						_delay_ms(200);
+					}
+					}else{
+					flag=0;
+				}
+				if(!READ_BIT(PINB,5))
+				{
+					if(flag2==0){
+						flag2=1;
+						blue--;
+						LCD_SetCursor(0,6);
+						LCD_WriteNumber(blue);
+						LCD_WriteString("  ");
+						_delay_ms(200);
+					}
+					}else{
+					flag2=0;
+				}
+			}
+			RGB_setColorRange(red,green,blue);
+			LCD_SetCursor(0,0);
+			LCD_WriteString("                                       ");
+			LCD_SetCursor(0,0);
+			LCD_WriteString("press 1 to continue: ");
+			
+			LCD_SetCursor(1,0);
+			LCD_WriteString("                                       ");
+			LCD_SetCursor(1,0);
+			LCD_WriteString("press 2 to exit: ");
+			
+			_delay_ms(2000);
+			
+			while(READ_BIT(PINB,7))
+			{
+
+				if(!READ_BIT(PINB,4))
+				{
+					if(flag2==0){
+						flag2=1;
+						currMode=set_color;
+						LCD_SetCursor(1,0);
+						LCD_WriteString("                                       ");
+						_delay_ms(200);
+						break;
+					}
+					}else{
+					flag2=0;
+				}
+				if(!READ_BIT(PINB,5))
+				{
+					if(flag2==0){
+						flag2=1;
+						currMode=stop;
+						LCD_SetCursor(1,0);
+						LCD_WriteString("                                       ");
+						_delay_ms(200);
+						
+						break;
+					}
+					}else{
+					flag2=0;
+				}
+			}
+			_delay_ms(1000);
+		  break;
+		  case lightWithColor:
+			LCD_SetCursor(0,0);
+			LCD_WriteString("                                       ");
+			LCD_SetCursor(0,0);
+			LCD_WriteString("Choose a color: ");
+			_delay_ms(1000);
+			LCD_SetCursor(0,0);
+			LCD_WriteString("                                       ");
+			while(READ_BIT(PINB,6))
+			{
+				if(!READ_BIT(PINB,4))
+				{
+					if(flag==0){
+						flag=1;
+						LCD_SetCursor(0,5);
+						colChoice =(colChoice+1)%12;
+						LCD_WriteString(arr[colChoice]);
+						LCD_WriteString("     ");
+						colChoice%=12;
+						_delay_ms(200);
+					}
+					}else{
+				    	flag=0;
+			     	}
+				if(!READ_BIT(PINB,5))
+				{
+					if(flag2==0){
+						flag2=1;
+						LCD_SetCursor(0,5);
+						colChoice--;
+						colChoice =(colChoice ==255 )? 0:colChoice;
+						LCD_WriteString(arr[colChoice]);
+						LCD_WriteString("     ");
+						_delay_ms(200);
+					}
+					}else{
+					flag2=0;
+				}
+			}
+			RGB_lightWithColor(colChoice);
+			LCD_SetCursor(0,0);
+			LCD_WriteString("                                       ");
+			LCD_SetCursor(0,0);
+			LCD_WriteString("press 1 to continue: ");
+			
+			LCD_SetCursor(1,0);
+			LCD_WriteString("                                       ");
+			LCD_SetCursor(1,0);
+			LCD_WriteString("press 2 to exit: ");
+			
+			_delay_ms(2000);
+			
+			while(READ_BIT(PINB,7))
+			{
+
+				if(!READ_BIT(PINB,4))
+				{
+					if(flag2==0){
+						flag2=1;
+						currMode=lightWithColor;
+						LCD_SetCursor(1,0);
+						LCD_WriteString("                                       ");
+						_delay_ms(200);
+						break;
+					}
+					}else{
+					flag2=0;
+				}
+				if(!READ_BIT(PINB,5))
+				{
+					if(flag2==0){
+						flag2=1;
+						currMode=stop;
+						LCD_SetCursor(1,0);
+						LCD_WriteString("                                       ");
+						_delay_ms(200);
+						
+						break;
+					}
+					}else{
+					flag2=0;
+				}
+			}
+			colChoice=-1;
+			_delay_ms(1000);
+			break;
+			case ShowRoom:
+				LCD_SetCursor(0,0);
+				LCD_WriteString("                                       ");
+				LCD_SetCursor(0,0);
+				LCD_WriteString("Choose a color: ");
+				_delay_ms(1000);
+				LCD_SetCursor(0,0);
+				LCD_WriteString("                                       ");
+				while(READ_BIT(PINB,6))
+				{
+					if(!READ_BIT(PINB,4))
+					{
+						if(flag==0){
+							flag=1;
+							LCD_SetCursor(0,5);
+							colChoice =(colChoice+1)%12;
+							LCD_WriteString(arr[colChoice]);
+							LCD_WriteString("     ");
+							_delay_ms(200);
+						}
+						}else{
+						flag=0;
+					}
+					if(!READ_BIT(PINB,5))
+					{
+						if(flag2==0){
+							flag2=1;
+							LCD_SetCursor(0,5);
+							colChoice--;
+							colChoice =(colChoice ==255 )? 0:colChoice;
+							LCD_WriteString(arr[colChoice]);
+							LCD_WriteString("     ");
+							_delay_ms(200);
+									
+						}
+						}else{
+						flag2=0;
+					}
+					
+				}
+				
+				LCD_SetCursor(0,0);
+				LCD_WriteString("                                       ");
+				LCD_SetCursor(0,0);
+				LCD_WriteString("press 1 to continue: ");
+				
+				LCD_SetCursor(1,0);
+				LCD_WriteString("                                       ");
+				LCD_SetCursor(1,0);
+				LCD_WriteString("press 2 to exit: ");
+				RGB_showRoom(colChoice);
+
+				
+				while(READ_BIT(PINB,7))
+				{
+
+					if(!READ_BIT(PINB,4))
+					{
+						if(flag2==0){
+							flag2=1;
+							currMode=ShowRoom;
+							LCD_SetCursor(1,0);
+							LCD_WriteString("                                       ");
+							_delay_ms(200);
+							break;
+						}
+						}else{
+						flag2=0;
+					}
+					if(!READ_BIT(PINB,5))
+					{
+						if(flag2==0){
+							flag2=1;
+							currMode=stop;
+							LCD_SetCursor(1,0);
+							LCD_WriteString("                                       ");
+							_delay_ms(200);
+							
+							break;
+						}
+						}else{
+						flag2=0;
+					}
+				}
+				colChoice=-1;
+				_delay_ms(1000);
+				break;
+			case ShowRoomSwap:
+			LCD_SetCursor(0,0);
+			LCD_WriteString("                                       ");
+			LCD_SetCursor(0,0);
+			LCD_WriteString("First color: ");
+			_delay_ms(1000);
+			LCD_SetCursor(0,0);
+			LCD_WriteString("                                       ");
+			while(READ_BIT(PINB,6))
+			{
+				if(!READ_BIT(PINB,4))
+				{
+					if(flag==0){
+						flag=1;
+						LCD_SetCursor(0,5);
+						colChoice =(colChoice+1)%12;
+						LCD_WriteString(arr[colChoice]);
+						LCD_WriteString("            ");
+						_delay_ms(200);
+					}
+					}else{
+					flag=0;
+				}
+				if(!READ_BIT(PINB,5))
+				{
+					if(flag2==0){
+						flag2=1;
+						LCD_SetCursor(0,5);
+						colChoice--;
+						colChoice =(colChoice ==255 )? 0:colChoice;
+						LCD_WriteString(arr[colChoice]);
+						LCD_WriteString("            ");
+						_delay_ms(200);
+						
+					}
+					}else{
+					flag2=0;
+				}
+			}
+			    first=colChoice;
+				LCD_SetCursor(0,0);
+				LCD_WriteString("                                       ");
+				LCD_SetCursor(0,0);
+				LCD_WriteString("Second color: ");
+				_delay_ms(1000);
+				LCD_SetCursor(0,0);
+				LCD_WriteString("                                       ");
+				
+				while(READ_BIT(PINB,6))
+				{
+					if(!READ_BIT(PINB,4))
+					{
+						if(flag==0){
+							flag=1;
+							LCD_SetCursor(0,5);
+							colChoice2 =(colChoice2+1)%12;
+							LCD_WriteString(arr[colChoice2]);
+							LCD_WriteString("     ");
+							_delay_ms(200);
+						}
+						}else{
+						flag=0;
+					}
+					if(!READ_BIT(PINB,5))
+					{
+						if(flag2==0){
+							flag2=1;
+							LCD_SetCursor(0,5);
+							colChoice2--;
+							colChoice =(colChoice2 ==255 )? 0:colChoice2;
+							LCD_WriteString(arr[colChoice2]);
+							LCD_WriteString("     ");
+							_delay_ms(200);
+							
+						}
+						}else{
+						flag2=0;
+					}
+				}
+				sec=colChoice2;
+				LCD_SetCursor(0,0);
+				LCD_WriteString("                                       ");
+				LCD_SetCursor(0,0);
+				LCD_WriteString(".....  ");
+				RGB_showRoomSwap(first,sec);
+				LCD_SetCursor(0,0);
+				LCD_WriteString("                                       ");
+				LCD_SetCursor(0,0);
+				LCD_WriteString("press 1 to continue: ");
+				LCD_SetCursor(1,0);
+				LCD_WriteString("                                       ");
+				LCD_SetCursor(1,0);
+				LCD_WriteString("press 2 to exit: ");
+				currMode=ShowRoomSwap;
+				while(READ_BIT(PINB,7))
+				{
+	
+					if(!READ_BIT(PINB,4))
+					{
+						if(flag2==0){
+							flag2=1;
+							currMode=ShowRoomSwap;
+							LCD_SetCursor(1,0);
+							LCD_WriteString("                                       ");
+							_delay_ms(200);
+							break;
+						}
+						}else{
+						flag2=0;
+					}
+					if(!READ_BIT(PINB,5))
+					{
+						if(flag2==0){
+							flag2=1;
+							currMode=stop;
+							RGB_showRoomSwapDisaple();
+							LCD_SetCursor(1,0);
+							LCD_WriteString("                                       ");
+							_delay_ms(200);
+							
+							break;
+						}
+						}else{
+						flag2=0;
+					}
+				}
+			break;
+			case TravelAllColors:
+				RGB_TravelAllColors();
+					LCD_SetCursor(0,0);
+					LCD_WriteString("                                       ");
+					LCD_SetCursor(0,0);
+					LCD_WriteString("press 1 to continue: ");
+					LCD_SetCursor(1,0);
+					LCD_WriteString("                                       ");
+					LCD_SetCursor(1,0);
+					LCD_WriteString("press 2 to exit: ");
+					while(READ_BIT(PINB,7))
+					{
+						if(!READ_BIT(PINB,4))
+						{
+							if(flag2==0){
+								flag2=1;
+								currMode=TravelAllColors;
+								LCD_SetCursor(1,0);
+								LCD_WriteString("                                       ");
+								_delay_ms(200);
+								break;
+							}
+							}else{
+							flag2=0;
+						}
+						if(!READ_BIT(PINB,5))
+						{
+							if(flag==0){
+								flag=1;
+								currMode=stop;
+								LCD_SetCursor(1,0);
+								LCD_WriteString("                                       ");
+								_delay_ms(200);
+								break;
+							}
+							}else{
+							flag=0;
+						}
+					}
+				break;
+		case ShowRoomAllColors:
+			LCD_SetCursor(0,0);
+			LCD_WriteString("                                 ");
+			while(READ_BIT(PINB,6))
+			{
+				if (!RGB_showRoomIsRunning())
+				{
+					LCD_SetCursor(0,5);
+					colChoice =(colChoice+1)%RGB_totalNumOfColors();
+					RGB_showRoom(colChoice);
+					LCD_WriteString(arr[colChoice]);
+					LCD_WriteString("          ");
+				}	
+		     	if(!READ_BIT(PINB,5)||!READ_BIT(PINB,4))
+			    {
+				if(flag2==0){
+					flag2=1;
+					flag=0;
+					currMode=stop;
+					_delay_ms(200);
+					break;		
+				}
+				}else{
+				flag2=0;
+			}
+		}
+		break;
+	  }
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	/*
+		if (prevMode==ShowRoomSwap && currMode==stop)
+		{
+			if(!RGB_showRoomIsRunning())
+			{
+				RGB_showRoomSwap(colChoice,colChoice2);
+			}
+		}*/
+		/*if (!RGB_showRoomIsRunning())
+		{
+			RGB_showRoomSwap(RGB_Red,RGB_Green);
+			
+		}*/
+		
+		/*	RGB_lightWithColor(i);
+			LCD_SetCursor(0,5);
+			LCD_WriteString("            ");
+			LCD_SetCursor(0,5);
+			LCD_WriteString(arr[i]);
+			_delay_ms(5000);
+			i++;
+			i=i%12;*/
+		
+		/*for (int i=0;i<TOTAL_COLORS;i++)
+		{
+			RGB_lightWithColor(i);
+			LCD_SetCursor(0,1);
+			LCD_WriteNumber(i+1);
+			LCD_WriteString("  ");
+			_delay_ms(3000);
+		}*/
+		/*
+		OCR1A=ADC_Read(CH_0)*50;
+		OCR1B=255-ADC_Read(CH_0)*50;
+		ICR1=ADC_Read(CH_7)*50;
+		//adc=ADC_Read(CH_0)*(u32)2000;
+		LCD_SetCursor(0,0);
+		LCD_WriteNumber(ICR1);
+		LCD_WriteString("  ");
+		LCD_SetCursor(1,0);
+		LCD_WriteNumber(OCR1A);
+		LCD_WriteString("  ");
+		*/
+			/*OCR0=255-x/4;*/
+			
+		//_delay_ms(500);
+    }
+}
+
+/*ISR(TIMER2_OVF_vect)
+{
+	static u16 c=0;
+	
+	c++;
+	TCNT2=6;
+	if(c==200)
+	{
+		DIO_TogglePin(PINC0);
+		c=0;
+	}
+	//DIO_TogglePin(PINC0);
+	
+}*/
+/*
+ISR(TIMER0_OC_vect)
+{
+	DIO_TogglePin(PINC1);
+}*/
+//Toggle LED every
+//Toggle 2 LED led every 1 Sec and led every 0.5 sec ignore 0.25 (256MS INT Time)
+/*ISR(TIMER0_OVF_vect)
+{
+	static u16 c=0;
+	static u16 c2=0;
+	c++;
+	c2++;
+	if(c == 3907)
+	{
+		DIO_TogglePin(PINC0);
+		c=0;
+	}
+	if(c2 == 1953)
+	{
+		DIO_TogglePin(PINC1);
+		c2=0;`
+	}
+}*/
+// Toggle LED every 1 Sec First method
+/*ISR(TIMER0_OVF_vect)
+{
+	static u16 c=0;
+	c++;
+	if(c == 3907)
+	{
+		TCNT0=192;
+		DIO_TogglePin(PINC0);
+		c=0;
+	}
+}*/
+// Toggle LED every 1 Sec Second method
+/*ISR(TIMER0_OVF_vect)
+{
+	static u16 c=0;
+	c++;
+	TCNT0=6;
+	if(c == 4000)
+	{
+		DIO_TogglePin(PINC0);
+		c=0;
+	}
+}*/
+//10HZ//10% duty Ton=10ms-Toff=90ms
+/*
+ISR(TIMER0_OVF_vect)
+{
+	static u16 c=0;
+	c++;
+	TCNT0=6;
+	if(c == 360)
+	{
+		DIO_WritePin(PINC0,HIGH);
+	}
+	if(c == 400)
+	{
+		DIO_WritePin(PINC0,LOW);
+		c=0;
+	}
+}*/
+//same10HZ//20% duty Ton=20ms-Toff=80ms
+/*ISR(TIMER0_OVF_vect)
+{
+	static u16 c=0;
+	c++;
+	TCNT0=6;
+	if(c == 80)
+	{
+		DIO_WritePin(PINC0,LOW);
+	}
+	if(c == 400)
+	{
+		DIO_WritePin(PINC0,HIGH);
+		c=0;
+	}
+}*/
+//20HZ 20% duty Ton =5ms Toff=45ms
+/*ISR(TIMER0_OVF_vect)
+{
+	static u16 c=0;
+	c++;
+	TCNT0=6;
+	if(c == 20)
+	{
+		DIO_WritePin(PINC0,LOW);
+	}
+	if(c == 200)
+	{
+		DIO_WritePin(PINC0,HIGH);
+		c=0;
+	}
+}*/
+//40HZ 50% duty 
+/*ISR(TIMER0_OVF_vect)
+{
+	static u16 c=0;
+	c++;
+	TCNT0=6;
+	if(c == 50)
+	{
+		DIO_TogglePin(PINC0);
+		c=0;
+	}
+}*/
+//100Hz--20% duty cycle
+/*ISR(TIMER0_OVF_vect)
+{
+	static u16 c=0;
+	c++;
+	TCNT0=6;
+	if(c == 32)
+	{
+		DIO_WritePin(PINC0,HIGH);
+	}else if (c==40)
+	{
+		DIO_WritePin(PINC0,LOW);
+		c=0;
+	}
+}*/
+//10KHz--20% duty cycle
+//make IOV comes every 20Ms
+/*ISR(TIMER0_OVF_vect)
+{
+	static u16 c=0;
+	TCNT0=236;
+	c++;
+	if(c==4)
+	{
+		DIO_WritePin(PINC0,HIGH);
+	}else if (c==5)
+	{
+		DIO_WritePin(PINC0,LOW);
+		c=0;
+	}
+}*/
+//10KHz--20% duty cycle
+/*ISR(TIMER0_OVF_vect)
+{
+	static u16 flag=0;
+	
+	if(flag==0)
+	{
+		TCNT0=236;
+		DIO_WritePin(PINC0,HIGH);
+		flag=1;
+	}else if (flag==1)
+	{
+		TCNT0=176;
+		DIO_WritePin(PINC0,LOW);
+		flag=0;
+	}
+}*/
+//Task1 with same interrupt generate 100HZ - 50HZ - 20HZ 50% Duty cycle 
+/*ISR(TIMER0_OVF_vect)
+{
+	static u16 c=0;
+	TCNT0=6;
+	c++;
+	//5ms
+	if(c%20 == 0)
+	{
+		DIO_TogglePin(PINC0);
+	}
+	//20ms
+	if(c%40 == 0)
+	{
+		DIO_TogglePin(PINC1);
+	}
+	//100ms
+	if(c%100 == 0)
+	{
+		DIO_TogglePin(PINC2);
+	}
+	if(c%200 == 0)
+	{
+		c=0;
+	}
+}*/
+//Task2 Generate with 50% duty cycle  5KHZ-50KHZ-500KHZ and 500KHZ 10% Duty cycle 
+//5KHZ Ton=100Ms & Toff=100Ms
+/*ISR(TIMER0_OVF_vect)
+{
+	
+	TCNT0=156;
+	DIO_TogglePin(PINC0);
+
+}*/
+//50KHZ Ton=10Ms & Toff=10Ms
+/*ISR(TIMER0_OVF_vect)
+{
+	
+	TCNT0=246;
+	DIO_TogglePin(PINC0);
+
+}*/
+//500KHZ Ton=1Ms & Toff=1Ms with tick time =1MS
+/*ISR(TIMER0_OVF_vect)
+{
+	
+	TCNT0=255;
+	DIO_TogglePin(PINC0);
+
+}*/
+//500KHZ Ton=1Ms & Toff=1Ms with tick time =125nS
+/*ISR(TIMER0_OVF_vect)
+{
+	
+	TCNT0=248;
+	DIO_TogglePin(PINC0);
+
+}*/
+//1 minute with prescaler 1028 and tick time =125MS 
+/*ISR(TIMER0_OVF_vect)
+{
+	static u16 c=0;
+	c++;
+	if(c == 1832)
+	{
+		TCNT0=242;
+		DIO_TogglePin(PINC0);
+		c=0;
+	}
+
+}*/
