@@ -27,11 +27,11 @@ typedef enum
 	}RunningMode;
 void swap(u8* f,u8* sec)
 {
-	cli();
+	
 	u8 t=*f;
 	*f=*sec;
 	*sec=t;
-	sei();
+	
 }
 void f(void)
 {
